@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Age Verification | Stäke Homes</title>
+  <meta name="robots" content="noindex" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet" />
+
+  <script>
+    /* ============================================================
+       SETTINGS: edit these values
+       ============================================================ */
+    const CONFIG = {
+      // Background image for desktop / larger screens
+      BACKGROUND_IMAGE: "https://ik.imagekit.io/v3c8xxz93/st-desk.webp",
+
+      // Background image for phones (screens 768px wide or less)
+      BACKGROUND_IMAGE_MOBILE: "https://ik.imagekit.io/v3c8xxz93/st-desk.webp",
+
+      // Where to send the visitor when they click "Yes, I'm 18+"
+      YES_URL: "index.html",
+
+      // Where to send the visitor when they click "No"
+      NO_URL: "https://www.google.com",
+
+      // Where to send the visitor when they click the "×" close button
+      CLOSE_URL: "https://www.google.com",
+
+      // Link for "Terms & Conditions" (replace "#" with your terms page)
+      TERMS_URL: "#"
+    };
+  </script>
+
+  <style>
+    :root {
+      /* Colors: change these to restyle the popup */
+      --popup-bg: #ffffff;
+      --title: #f0625a;
+      --text: #3d3d3d;
+      --muted: #8a8a8a;
+      --yes: #34b03f;
+      --yes-hover: #2b9634;
+      --no: #d81b4a;
+      --no-hover: #b8153d;
+      --link: #3b5bdb;
+
+      /* Background blur and overlay */
+      --blur: 6px;
+      --overlay-top: rgba(0, 0, 0, .45);
+      --overlay-bottom: rgba(0, 0, 0, .65);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; }
+    body {
+      font-family: "Source Sans 3", "Segoe UI", system-ui, sans-serif;
+      min-height: 100vh;
+      background-color: #1a1a1a;
+      overflow: hidden;
+    }
+
+    /* Background image layer: fills the full screen, blurred */
+    .bg {
+      position: fixed;
+      inset: 0;
+      height: 100vh;
+      height: 100dvh;
+      background-image: var(--bg-desk);
+      background-size: cover;
+      background-position: center center;
+      background-repeat: no-repeat;
+      filter: blur(var(--blur));
+      transform: scale(1.08); /* hides the soft edges the blur creates */
+      z-index: 0;
+    }
+    @media (max-width: 768px) {
+      .bg { background-image: var(--bg-mob, var(--bg-desk)); }
+    }
+
+    /* Overlay on top of the image */
+    .overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      background: linear-gradient(180deg, var(--overlay-top), var(--overlay-bottom));
+    }
+
+    /* Full-screen layer that keeps the popup dead center */
+    .stage {
+      position: fixed;
+      inset: 0;
+      z-index: 1;
+      display: flex;
+      padding: 24px 16px;
+      overflow-y: auto;
+    }
+    .card {
+      position: relative;
+      margin: auto;
+      width: min(400px, 100%);
+      background: var(--popup-bg);
+      border-radius: 12px;
+      padding: 48px 36px 44px;
+      text-align: center;
+      box-shadow: 0 24px 60px -18px rgba(0, 0, 0, .6);
+      animation: pop .35s ease both;
+    }
+    @keyframes pop { from { opacity: 0; transform: scale(.94); } }
+
+    h1 {
+      color: var(--title);
+      font-size: 1.65rem;
+      font-weight: 400;
+      line-height: 1.2;
+      letter-spacing: .01em;
+    }
+    .sub {
+      color: var(--text);
+      font-size: 1.12rem;
+      line-height: 1.85;
+      letter-spacing: .015em;
+      margin: 18px 0 20px;
+    }
+    .sub strong { font-weight: 700; }
+
+    .actions { display: flex; justify-content: center; gap: 14px; flex-wrap: wrap; }
+    .btn {
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      color: #fff;
+      border: 0;
+      border-radius: 999px;
+      padding: 12px 25px;
+      cursor: pointer;
+      transition: background .2s, transform .15s;
+    }
+    .btn:hover { transform: translateY(-1px); }
+    .btn:active { transform: translateY(0); }
+    .btn:focus-visible { outline: 3px solid rgba(59, 91, 219, .5); outline-offset: 3px; }
+    .btn-yes { background: var(--yes); }
+    .btn-yes:hover { background: var(--yes-hover); }
+    .btn-no { background: var(--no); min-width: 72px; }
+    .btn-no:hover { background: var(--no-hover); }
+
+    .close {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      width: 32px;
+      height: 32px;
+      display: grid;
+      place-items: center;
+      border: 0;
+      border-radius: 50%;
+      background: transparent;
+      color: #9a9a9a;
+      cursor: pointer;
+      transition: background .2s, color .2s;
+    }
+    .close:hover { background: #f1f1f1; color: #333; }
+    .close:focus-visible { outline: 3px solid rgba(59, 91, 219, .5); outline-offset: 2px; }
+    .close svg { width: 16px; height: 16px; }
+
+    .fine {
+      margin-top: 30px;
+      color: var(--muted);
+      font-size: .9rem;
+      letter-spacing: .02em;
+    }
+    .fine a { color: var(--link); font-weight: 700; text-decoration: none; }
+    .fine a:hover { text-decoration: underline; }
+
+    @media (max-width: 420px) {
+      .card { padding: 38px 22px 32px; }
+      .sub { font-size: 1.02rem; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      * { animation: none !important; transition: none !important; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="bg" id="bg" aria-hidden="true"></div>
+  <div class="overlay" aria-hidden="true"></div>
+
+  <div class="stage">
+    <main class="card" role="dialog" aria-labelledby="title" aria-describedby="desc">
+      <button class="close" id="closeBtn" type="button" aria-label="Close">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+      <h1 id="title">Age Verification</h1>
+      <p class="sub" id="desc">You must be <strong>18 years or older</strong> to access this site. Please confirm your age below.</p>
+      <div class="actions">
+        <button class="btn btn-yes" id="yesBtn" type="button">Yes, I'm 18+</button>
+        <button class="btn btn-no" id="noBtn" type="button">No</button>
+      </div>
+      <p class="fine">By continuing, you agree to our <a href="#" id="termsLink">Terms &amp; Conditions</a>.</p>
+    </main>
+  </div>
+
+  <script>
+    // Apply the desktop and mobile background images
+    function cssUrl(u) { return 'url("' + u.replace(/"/g, '%22') + '")'; }
+    var bg = document.getElementById("bg");
+    if (CONFIG.BACKGROUND_IMAGE) bg.style.setProperty("--bg-desk", cssUrl(CONFIG.BACKGROUND_IMAGE));
+    if (CONFIG.BACKGROUND_IMAGE_MOBILE) bg.style.setProperty("--bg-mob", cssUrl(CONFIG.BACKGROUND_IMAGE_MOBILE));
+
+    document.getElementById("termsLink").href = CONFIG.TERMS_URL;
+
+    document.getElementById("yesBtn").addEventListener("click", function () {
+      window.location.href = CONFIG.YES_URL;
+    });
+    document.getElementById("noBtn").addEventListener("click", function () {
+      window.location.href = CONFIG.NO_URL;
+    });
+    document.getElementById("closeBtn").addEventListener("click", function () {
+      window.location.href = CONFIG.CLOSE_URL;
+    });
+  </script>
+</body>
+</html>
